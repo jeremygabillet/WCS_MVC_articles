@@ -8,22 +8,39 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using WCS_MVC_articles.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace WCS_MVC_articles
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
+            Environment = env;
             Configuration = configuration;
         }
 
+        public IWebHostEnvironment Environment { get; }
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddDbContext<MvcArticleContext>(options =>
+            {
+                var connectionString = Configuration.GetConnectionString("MvcMovieContext");
+
+                if (Environment.IsDevelopment())
+                {
+                    options.UseSqlite(connectionString);
+                }
+                else
+                {
+                    options.UseSqlServer(connectionString);
+                }
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
